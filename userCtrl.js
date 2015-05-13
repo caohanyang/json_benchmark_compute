@@ -22,6 +22,8 @@ angular.module('userCtrl', [])
       var rate;
 
       $scope.users = User.query(parameter, function() {
+          console.log($scope.users[0]);
+          console.log($scope.users[1]);
           var diffStartTime = Date.now();
           switch ($scope.algorithm) {
             case "0":
@@ -89,10 +91,8 @@ angular.module('userCtrl', [])
             // clear the data
             clear();
           });
-
       });
    };
-
 });
 
 

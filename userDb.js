@@ -5,7 +5,6 @@ var jsondiffpatch = require('jsondiffpatch'),
 	Mock = require('mockjs'),
 	fs = require('fs'),
     changeSet = require('changeset'),
-    diffjson = require('diff-json');
 	users = [];
 var test = require('unit.js');
 var assert = test.assert;
@@ -13,17 +12,17 @@ var grammar, size, probability, algorithm;
 var comparedData;  
 
 var smallGrammar = {
-    'father|1-1': [{
-	 'id|+1': 1,
+    'father|1': [{
+     'id|+1': 1,
          "married|1" : true,
          "name" : "@FIRST @LAST",
-	 "sons" : null,
-	 "daughters|3-3" : [ 
-	     { 
-		  "age|0-31" : 0,
-		  "name" : "@FIRST"
-	     }
-	 ]
+     "sons" : null,
+     "daughters|1" : [ 
+         { 
+          "age|0-31" : 0,
+          "name" : "@FIRST"
+         }
+     ]
     }],
 
     'string|1-10': '*'
@@ -31,54 +30,48 @@ var smallGrammar = {
 
 
 var mediumGrammar = {
-    'father|20-20': [{
-	 'id|+1': 1,
+    'father|65': [{
+     'id|+1': 1,
          "married|1" : true,
          "name" : "@FIRST @LAST",
-	 "sons" : null,
-	 "daughters|3-3" : [ 
-	     { 
-		  "age|0-31" : 0,
-		  "name" : "@FIRST"
-	     }
-	 ]
+     "sons" : null,
+     "daughters|3" : [ 
+         { 
+          "age|0-31" : 0,
+          "name" : "@FIRST"
+         }
+     ]
     }],
 
     'string|1-10': '*'
 };
 
 var largeGrammar = {
-    'father|10000-10000': [{
-	 'id|+1': 1,
+    'father|6410': [{
+     'id|+1': 1,
          "married|1" : true,
          "name" : "@FIRST @LAST",
-	 "sons" : null,
-	 "daughters|3-3" : [ 
-	     { 
-		  "age|0-31" : 0,
-		  "name" : "@FIRST"
-	     }
-	 ]
+     "sons" : null,
+     "daughters|3" : [ 
+         { 
+          "age|0-31" : 0,
+          "name" : "@FIRST"
+         }
+     ]
     }],
 
     'string|1-10': '*'
 };
 
 exports.findUser = function(req, res){
-	console.log("==========================");
 	console.log(req.query);
+
     algorithm = req.query.algorithm;
-
-    if(size != req.query.size || probability != req.query.probability) {
-        
+    probability = req.query.probability;
+    
+    if(size != req.query.size) {
+    
         size = req.query.size;
-        probability = req.query.probability;
-
-        console.log(req.query.algorithm);
-        console.log(req.query.size);
-        console.log(req.query.probability);
-    
-    
         switch (size) {
         case "small": grammar = smallGrammar; break;
         case "medium": grammar = mediumGrammar; break;
@@ -88,17 +81,18 @@ exports.findUser = function(req, res){
         users[1] = Mock.mock(grammar);                   //1:modified data
         users[0] = JSON.parse(JSON.stringify(users[1])); //0:origin data
 
-        fuzzer.seed(41);
-        
-        //set the probability to change the node
-        fuzzer.changeChance(probability);
-
-        // mutate JSON Object
-        var generator = fuzzer.mutate.object(users[1]);
-        
-        // tranverse it 
-        generator();  
     } 
+    
+    fuzzer.seed(41);
+    
+    //set the probability to change the node
+    fuzzer.changeChance(probability);
+
+    // mutate JSON Object
+    var generator = fuzzer.mutate.object(users[1]);
+    
+    // tranverse it 
+    generator();  
     
     //use the comparedData to copy the origin data
     comparedData = JSON.parse(JSON.stringify(users[0]));
