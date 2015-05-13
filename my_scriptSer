@@ -1,0 +1,8 @@
+#!/bin/bash
+# My first script
+
+#start the server
+mkdir result
+killall node
+
+node server.js

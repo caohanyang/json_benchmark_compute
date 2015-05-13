@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head >
+  <meta charset="UTF-8">
+  <title>Benchmark</title>
+
+  <!-- FOR ANGULAR ROUTING -->
+  <base href="/" />
+
+
+  <!-- JS -->
+  <!-- load angular and angular-route -->
+  <script type="text/javascript" src="bower_components/angular/angular.js"></script>
+  <script type="text/javascript" src="bower_components/angular-route/angular-route.js"></script>
+  <script type="text/javascript" src="bower_components/angular-resource/angular-resource.js"></script>
+
+  <script type="text/javascript" src="bower_components/jsondiffpatch/public/build/jsondiffpatch.js"></script>
+  <script type="text/javascript" src="bower_components/jsondiffpatch/public/build/jsondiffpatch-full.js"></script>
+  <script type="text/javascript" src="bower_components/jsondiffpatch/public/build/jsondiffpatch-formatters.js"></script>
+  <script type="text/javascript" src="bower_components/fast-json-patch/src/json-patch-duplex.js"></script>
+  <script type="text/javascript" src="bower_components/jiff/jiffMain.js"></script>
+  <script type="text/javascript" src="bower_components/changeset/changeset.js"></script>
+ 
+  <!-- controllers -->
+  <script type="text/javascript" src="userCtrl.js"></script>
+
+  <!-- services -->
+  <script type="text/javascript" src="userService.js"></script>
+
+  <!-- main Angular app files -->
+  <script type="text/javascript" src="app.js"></script>
+</head>
+
+<body align="center" ng-app="userApp" ng-controller="userController">
+
+<form class="form-inline" >
+
+<table class="table" align="center">
+      <tr >
+        <td><b>Algorithm:</b></td><td><input ng-model="algorithm" type="text" class="input-small"/></td>
+      </tr>
+      <tr >
+        <td><b>Size:</b></td><td><input ng-model="size" type="text" class="input-small"/></td>
+      </tr>
+      <tr >
+        <td><b>Probability:</b></td><td><input ng-model="probability" type="text" class="input-small"/></td>
+</table>
+
+<br>
+
+<button ng-click="sendPara()" id="gobutton" class="btn">Go!</button>
+
+<h2>{{mark}}</h2>
+
+</form>
+
+
+</body>
+
+</html>
