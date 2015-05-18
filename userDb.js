@@ -67,10 +67,10 @@ exports.findUser = function(req, res){
 	console.log(req.query);
 
     algorithm = req.query.algorithm;
-    probability = req.query.probability;
-    
-    if(size != req.query.size) {
-    
+   
+    //according to the same size and same probability, different algorithms, the old data and new data are the same.
+    if(size != req.query.size ) {
+
         size = req.query.size;
         switch (size) {
         case "small": grammar = smallGrammar; break;
@@ -79,25 +79,32 @@ exports.findUser = function(req, res){
         }
 
         users[1] = Mock.mock(grammar);                   //1:modified data
-        users[0] = JSON.parse(JSON.stringify(users[1])); //0:origin data
-
+        users[0] = JSON.parse(JSON.stringify(users[1])); //0:origin data               
     } 
-    
-    fuzzer.seed(41);
-    
-    //set the probability to change the node
-    fuzzer.changeChance(probability);
 
-    // mutate JSON Object
-    var generator = fuzzer.mutate.object(users[1]);
-    
-    // tranverse it 
-    generator();  
-    
+    //according to the same size and different probalility, same altorithm, the old data is the same.
+    if (probability != req.query.probability) {
+          
+            probability = req.query.probability;
+
+            fuzzer.seed(41);
+
+            //set the probability to change the node
+            fuzzer.changeChance(probability);
+
+            // mutate JSON Object
+            var generator = fuzzer.mutate.object(users[1]);
+
+            // tranverse it 
+            generator(); 
+
+    }
+     
     //use the comparedData to copy the origin data
     comparedData = JSON.parse(JSON.stringify(users[0]));
 
-    console.log(JSON.stringify(users[1]).length);
+    console.log("old data: "+JSON.stringify(users[0]).length);   
+    console.log("new data: "+JSON.stringify(users[1]).length);
 	res.send(users);
 }
 
