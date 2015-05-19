@@ -24,44 +24,64 @@ angular.module('userCtrl', [])
       $scope.users = User.query(parameter, function() {
           console.log($scope.users[0]);
           console.log($scope.users[1]);
+          if($scope.size == "large") {
+             times = 100;
+          } else {
+             times = 10000;
+          }
+
           var diffStartTime = Date.now();
           switch ($scope.algorithm) {
             case "0":
-              var delta = $scope.users[1];
+
+              for(var i = 0; i<times;i++) {
+                var delta = $scope.users[1];
+              }
               break;
             case "1":
-              var delta = jsondiffpatch.diff($scope.users[0], $scope.users[1]);
+
+              for(var i = 0; i<times;i++) {
+                 var delta = jsondiffpatch.diff($scope.users[0], $scope.users[1]);
+               }
               break;  
             case "2":
-              var delta = jsonpatch.compare($scope.users[0], $scope.users[1]);
+
+              for(var i = 0; i<times;i++) {
+                var delta = jsonpatch.compare($scope.users[0], $scope.users[1]);
+              }
               break;
             case "3":
+            
               if($scope.size == "large") {
                 //this algorithem isn't work when the data is large
                 $scope.mark = 'ko';
               } else {
-                var jiff = require('jiff');
-                var delta = jiff.diff($scope.users[0], $scope.users[1]);
+                for(var i = 0; i<times;i++) {
+                  var jiff = require('jiff');
+                  var delta = jiff.diff($scope.users[0], $scope.users[1]);
+                }
               }
               break;
             case "4":
               //Usage: input in console:  browserify index.js -r changeset >changeset.js
-              var changeset = require('changeset');
-              var delta = changeset($scope.users[0], $scope.users[1]);
+              if($scope.size == "large") {
+                //this algorithem isn't work when the data is large
+                $scope.mark = 'ko';
+              } else {
+                for(var i = 0; i<times;i++) {
+                  var changeset = require('changeset');
+                  var delta = changeset($scope.users[0], $scope.users[1]);
+                }
+              }
               break;
           }
           var diffEndTime = Date.now();
-
-          console.log(typeof delta);
 
           if (delta == undefined || $scope.algorithm=="0"){
             rate = 0;
           } else {
             rate = (JSON.stringify(delta).length)/(JSON.stringify($scope.users[0]).length);
           }
-
-
-          console.log("rate="+rate);
 
           var sendTime = Date.now();
 

@@ -11,9 +11,11 @@ describe('Protractor Demo App', function() {
     //browser.get('http://ghostblog-213388.euw1-2.nitrousbox.com:8080/');
   });
   
-  var algorithmArr = [0, 1, 2, 3, 4];
-  var sizeArr = ["small", "medium", "large"];
-  var probabilityArr = [[0.08, 0.2, 0.5], [0.05, 0.2, 0.4], [0.05, 0.2, 0.39]];
+  var algorithmArr = [0,1,2,3,4];
+  var sizeArr = ["small","medium","large"];
+  var probabilityArr = [[0.1, 0.21, 0.49], [0.1, 0.2, 0.37], [0.1, 0.2, 0.39]];
+  //var sizeArr = ["large"];
+  //var probabilityArr = [[0.1, 0.2, 0.39]];
   var num;
 
 it("do the test", function() {

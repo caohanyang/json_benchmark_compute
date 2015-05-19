@@ -9,7 +9,8 @@ var jsondiffpatch = require('jsondiffpatch'),
 var test = require('unit.js');
 var assert = test.assert;
 var grammar, size, probability, algorithm;
-var comparedData;  
+var comparedData, copyTime;  
+var times;
 
 var smallGrammar = {
     'father|1': [{
@@ -93,6 +94,7 @@ exports.findUser = function(req, res){
             fuzzer.changeChance(probability);
 
             // mutate JSON Object
+            users[1] = JSON.parse(JSON.stringify(users[0])); //0:origin data
             var generator = fuzzer.mutate.object(users[1]);
 
             // tranverse it 
@@ -118,61 +120,83 @@ exports.updateUser = function(req, res){
     var sendTime = req.body.sendTime;   
     var delta = req.body.delta;
 	var rate = req.body.rate;
-    console.log(rate);
-  	var patchStartTime ;          
-    var patchEndTime ;
+   
+    if(size == "large") {
+        times = 100;
+    } else {
+        times = 10000;
+    }
+
+    if (delta != undefined) {
+        var deltaSize = JSON.stringify(delta).length;
+    } else {
+        var deltaSize = 0;
+    }
  
-    patchStartTime = Date.now();
+    var copyStartTime = Date.now();
+    for(var i =0;i<times;i++) {
+        comparedData = JSON.parse(JSON.stringify(users[0]));
+    }
+    var copyEndTime = Date.now();
+
+    copyTime = copyEndTime - copyStartTime;
+
+    console.log("PATCHSIZE: "+deltaSize);
+
+    var patchStartTime = Date.now();
 
     switch (algorithm) {
     	case "0":
-    	    comparedData = delta;
+            //
     		break;
     	case "1":
-	    	jsondiffpatch.patch(comparedData, delta);
+            for (var i=0; i<times;i++) {
+                comparedData = JSON.parse(JSON.stringify(users[0]));
+                jsondiffpatch.patch(comparedData, delta);
+            }
     		break;
         case "2":
-            jsonpatch.apply(comparedData, delta);
+            for (var i=0; i<times;i++) {
+                comparedData = JSON.parse(JSON.stringify(users[0]));
+                jsonpatch.apply(comparedData, delta);
+            }
             break;
         case "3":
-            comparedData = jiff.patch(delta, comparedData);
+            if(size != "large") {
+                for (var i=0; i<times;i++) {
+                    comparedData = JSON.parse(JSON.stringify(users[0]));
+                    comparedData = jiff.patch(delta, comparedData);
+                }
+            }
             break;
         case "4":
-            comparedData = changeSet.apply(delta, comparedData);
-            break;
-        case "5":
-            comparedData = diffjson.applyChanges(comparedData, delta);
+            if(size != "large") {
+                for (var i=0; i<times;i++) {
+                comparedData = JSON.parse(JSON.stringify(users[0]));
+                comparedData = changeSet.apply(delta, comparedData);
+                }
+            }
             break;
     }
 
-	patchEndTime = Date.now();
+	var patchEndTime = Date.now();
     
-    //assert the data is the same
-    var flag = false;
-    console.log(JSON.stringify(users[1]).length);
-    console.log(JSON.stringify(comparedData).length);
-    var err = test.error(function() {
-        //assert the data
-   	    assert.equal(JSON.stringify(comparedData), JSON.stringify(users[1]));
-   	    //set the flag
-        flag = true;
-   	    throw new Error('OK!');
-    });
-    
-    if(flag) {
-    	//the two data is the same
-        writeCSV();
-        res.send("ok");
-    } else {
-    	//the two data is not the same
-        res.send("ko");
-    }
+    console.log(patchEndTime - patchStartTime);
+
+    writeCSV();
+    res.send("ok");
 
     function writeCSV () {
 
         var totalTime = (diffEndTime - diffStartTime) + (receiveTime - sendTime) + (patchEndTime - patchStartTime);
 
-        var result = (diffEndTime - diffStartTime)+',' +(receiveTime - sendTime) +',' +(patchEndTime - patchStartTime)+ ','+totalTime+','+rate+ '\n';
+        if(algorithm == "0") {
+            var result = '0,' +deltaSize +',0,'+rate +','+JSON.stringify(users[0]).length+'\n';
+        } else {
+            var result = (diffEndTime - diffStartTime)+',' + deltaSize +',' +(patchEndTime - patchStartTime - copyTime)+','+rate
+        +','+JSON.stringify(users[0]).length+ '\n';
+        }
+        
 
         fs.writeFile('./result/'+size+'-P'+probability+'-A'+algorithm+'.csv', result, {flag: 'a'}, function(err){
             if(err) throw err;
