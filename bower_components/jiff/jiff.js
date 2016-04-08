@@ -238,6 +238,3 @@ function defaultContext() {
 function isFunction(x) {
 	return typeof x === 'function';
 }
-
-
-module.exports = jiff;

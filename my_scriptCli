@@ -3,9 +3,8 @@
 
 #start the webdriver
 webdriver-manager start &
-#start to test 
-  for (( t=1; t<=$1; t++ ))
-  	do
-  	   protractor conf.js
-  	done 
-
+# #start to test
+#   for (( t=1; t<=$1; t++ ))
+#   	do
+#   	   protractor conf.js
+#   	done

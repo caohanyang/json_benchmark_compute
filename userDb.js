@@ -5,11 +5,12 @@ var jsondiffpatch = require('jsondiffpatch'),
 	Mock = require('mockjs'),
 	fs = require('fs'),
     changeSet = require('changeset'),
+    jdr = require('json-diff-rfc6902'),
 	users = [];
 var test = require('unit.js');
 var assert = test.assert;
 var grammar, size, probability, algorithm;
-var comparedData, copyTime;  
+var comparedData, copyTime;
 var times;
 
 var smallGrammar = {
@@ -18,8 +19,8 @@ var smallGrammar = {
          "married|1" : true,
          "name" : "@FIRST @LAST",
      "sons" : null,
-     "daughters|1" : [ 
-         { 
+     "daughters|1" : [
+         {
           "age|0-31" : 0,
           "name" : "@FIRST"
          }
@@ -36,8 +37,8 @@ var mediumGrammar = {
          "married|1" : true,
          "name" : "@FIRST @LAST",
      "sons" : null,
-     "daughters|3" : [ 
-         { 
+     "daughters|3" : [
+         {
           "age|0-31" : 0,
           "name" : "@FIRST"
          }
@@ -48,13 +49,14 @@ var mediumGrammar = {
 };
 
 var largeGrammar = {
-    'father|6410': [{
+    // 'father|6410': [{
+    'father|2000': [{
      'id|+1': 1,
          "married|1" : true,
          "name" : "@FIRST @LAST",
      "sons" : null,
-     "daughters|3" : [ 
-         { 
+     "daughters|3" : [
+         {
           "age|0-31" : 0,
           "name" : "@FIRST"
          }
@@ -68,7 +70,7 @@ exports.findUser = function(req, res){
 	console.log(req.query);
 
     algorithm = req.query.algorithm;
-   
+
     //according to the same size and same probability, different algorithms, the old data and new data are the same.
     if(size != req.query.size ) {
 
@@ -80,12 +82,12 @@ exports.findUser = function(req, res){
         }
 
         users[1] = Mock.mock(grammar);                   //1:modified data
-        users[0] = JSON.parse(JSON.stringify(users[1])); //0:origin data               
-    } 
+        users[0] = JSON.parse(JSON.stringify(users[1])); //0:origin data
+    }
 
     //according to the same size and different probalility, same altorithm, the old data is the same.
     if (probability != req.query.probability) {
-          
+
             probability = req.query.probability;
 
             fuzzer.seed(41);
@@ -97,30 +99,36 @@ exports.findUser = function(req, res){
             users[1] = JSON.parse(JSON.stringify(users[0])); //0:origin data
             var generator = fuzzer.mutate.object(users[1]);
 
-            // tranverse it 
-            generator(); 
+            // tranverse it
+            generator();
 
     }
-     
+
     //use the comparedData to copy the origin data
     comparedData = JSON.parse(JSON.stringify(users[0]));
 
-    console.log("old data: "+JSON.stringify(users[0]).length);   
+    console.log("old data: "+JSON.stringify(users[0]).length);
     console.log("new data: "+JSON.stringify(users[1]).length);
+    // fs.writeFile('./old-'+size+'-P'+probability+'-A'+algorithm+'.json', JSON.stringify(users[0], null, 1), function(err){
+    //     if(err) throw err;
+    // });
+    // fs.writeFile('./new-'+size+'-P'+probability+'-A'+algorithm+'.json', JSON.stringify(users[1], null, 1), function(err){
+    //     if(err) throw err;
+    // });
 	res.send(users);
 }
 
 exports.updateUser = function(req, res){
 	console.log("----------------------------");
-	
+
 	var receiveTime = Date.now();
-    
+
     var diffStartTime = req.body.diffStartTime;
     var diffEndTime = req.body.diffEndTime;
-    var sendTime = req.body.sendTime;   
+    var sendTime = req.body.sendTime;
     var delta = req.body.delta;
 	var rate = req.body.rate;
-   
+
     if(size == "large") {
         times = 100;
     } else {
@@ -132,7 +140,7 @@ exports.updateUser = function(req, res){
     } else {
         var deltaSize = 0;
     }
- 
+
     var copyStartTime = Date.now();
     for(var i =0;i<times;i++) {
         comparedData = JSON.parse(JSON.stringify(users[0]));
@@ -162,14 +170,22 @@ exports.updateUser = function(req, res){
             }
             break;
         case "3":
-            if(size != "large") {
+            // if(size != "large") {
                 for (var i=0; i<times;i++) {
                     comparedData = JSON.parse(JSON.stringify(users[0]));
-                    comparedData = jiff.patch(delta, comparedData);
+                    comparedData = jiff.patch(delta, comparedData, { invertible: false });
                 }
-            }
+            // }
             break;
         case "4":
+            // if(size != "large") {
+                for (var i=0; i<times;i++) {
+                comparedData = JSON.parse(JSON.stringify(users[0]));
+                comparedData = jdr.apply(comparedData, delta);
+                }
+            // }
+            break;
+        case "5":
             if(size != "large") {
                 for (var i=0; i<times;i++) {
                 comparedData = JSON.parse(JSON.stringify(users[0]));
@@ -180,8 +196,9 @@ exports.updateUser = function(req, res){
     }
 
 	var patchEndTime = Date.now();
-    
-    console.log(patchEndTime - patchStartTime);
+
+    console.log("Diff time: "+ (diffEndTime - diffStartTime));
+    console.log("Apply time: "+ (patchEndTime - patchStartTime));
 
     writeCSV();
     res.send("ok");
@@ -196,7 +213,7 @@ exports.updateUser = function(req, res){
             var result = (diffEndTime - diffStartTime)+',' + deltaSize +',' +(patchEndTime - patchStartTime - copyTime)+','+rate
         +','+JSON.stringify(users[0]).length+ '\n';
         }
-        
+
 
         fs.writeFile('./result/'+size+'-P'+probability+'-A'+algorithm+'.csv', result, {flag: 'a'}, function(err){
             if(err) throw err;
@@ -206,5 +223,3 @@ exports.updateUser = function(req, res){
     }
 
 }
-
-

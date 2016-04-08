@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.jiff = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -702,11 +702,15 @@ function patchInPlace(changes, x, options) {
 }
 
 function defaultHash(x) {
-	return isValidObject(x) ? JSON.stringify(x) : x;
+	return isValidObject(x) || isArray(x) ? JSON.stringify(x) : x;
 }
 
 function isValidObject (x) {
-	return x !== null && typeof x === 'object';
+	return x !== null && Object.prototype.toString.call(x) === '[object Object]';
+}
+
+function isArray (x) {
+	return Object.prototype.toString.call(x) === '[object Array]';
 }
 
 },{"./InvalidPatchOperationError":2,"./clone":6,"./patches":14}],11:[function(require,module,exports){
@@ -1182,6 +1186,10 @@ function applyAdd(x, change, options) {
 		throw new InvalidPatchOperationError('path does not exist ' + change.path);
 	}
 
+	if(change.value === void 0) {
+		throw new InvalidPatchOperationError('missing value');
+	}
+
 	var val = clone(change.value);
 
 	// If pointer refers to whole document, replace whole document
@@ -1200,6 +1208,8 @@ function _add(pointer, value) {
 		// '-' indicates 'append' to array
 		if(pointer.key === '-') {
 			target.push(value);
+		} else if (pointer.key > target.length) {
+			throw new InvalidPatchOperationError('target of add outside of array bounds')
 		} else {
 			target.splice(pointer.key, 0, value);
 		}
@@ -1241,6 +1251,10 @@ function applyReplace(x, change, options) {
 
 	if(notFound(pointer) || missingValue(pointer)) {
 		throw new InvalidPatchOperationError('path does not exist ' + change.path);
+	}
+
+	if(change.value === void 0) {
+		throw new InvalidPatchOperationError('missing value');
 	}
 
 	var value = clone(change.value);
@@ -1442,32 +1456,5 @@ function isValidObject (x) {
 	return x !== null && typeof x === 'object';
 }
 
-},{"./InvalidPatchOperationError":2,"./PatchNotInvertibleError":3,"./TestFailedError":4,"./array":5,"./clone":6,"./commutePaths":7,"./deepEquals":8,"./jsonPointer":11}],15:[function(require,module,exports){
-arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],16:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],17:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],18:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],19:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],20:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"./jsonPointer":24,"dup":7}],21:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],22:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"./patches":27,"dup":9}],23:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"./InvalidPatchOperationError":15,"./clone":19,"./patches":27,"dup":10}],24:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"./jsonPointerParse":25,"dup":11}],25:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],26:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],27:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"./InvalidPatchOperationError":15,"./PatchNotInvertibleError":16,"./TestFailedError":17,"./array":18,"./clone":19,"./commutePaths":20,"./deepEquals":21,"./jsonPointer":24,"dup":14}],"jiff":[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"./lib/InvalidPatchOperationError":15,"./lib/PatchNotInvertibleError":16,"./lib/TestFailedError":17,"./lib/array":18,"./lib/inverse":22,"./lib/jsonPatch":23,"./lib/jsonPointer":24,"./lib/lcs":26,"dup":1}]},{},[1]);
+},{"./InvalidPatchOperationError":2,"./PatchNotInvertibleError":3,"./TestFailedError":4,"./array":5,"./clone":6,"./commutePaths":7,"./deepEquals":8,"./jsonPointer":11}]},{},[1])(1)
+});

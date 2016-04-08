@@ -1,7 +1,7 @@
 angular.module('userCtrl', [])
 .controller('userController', function($scope, User){
    $scope.sendPara = function(){
-      
+
       var parameter = {
         "size": $scope.size,
         "probability": $scope.probability,
@@ -15,7 +15,7 @@ angular.module('userCtrl', [])
         $scope.loopTimes=null;
         $scope.algorithm=null;
       };
-    
+
       //clear the mark
       $scope.mark=null;
 
@@ -43,7 +43,7 @@ angular.module('userCtrl', [])
               for(var i = 0; i<times;i++) {
                  var delta = jsondiffpatch.diff($scope.users[0], $scope.users[1]);
                }
-              break;  
+              break;
             case "2":
 
               for(var i = 0; i<times;i++) {
@@ -51,18 +51,30 @@ angular.module('userCtrl', [])
               }
               break;
             case "3":
-            
-              if($scope.size == "large") {
-                //this algorithem isn't work when the data is large
-                $scope.mark = 'ko';
-              } else {
+
+              // if($scope.size == "large") {
+              //   //this algorithem isn't work when the data is large
+              //   $scope.mark = 'ko';
+              // } else {
                 for(var i = 0; i<times;i++) {
-                  var jiff = require('jiff');
-                  var delta = jiff.diff($scope.users[0], $scope.users[1]);
+                  // var jiff = require('jiff');
+                  var delta = jiff.diff($scope.users[0], $scope.users[1], { invertible: false });
                 }
-              }
+              // }
               break;
             case "4":
+              //Usage: input in console:  browserify index.js -r changeset >changeset.js
+              // if($scope.size == "large") {
+              //   //this algorithem isn't work when the data is large
+              //   $scope.mark = 'ko';
+              // } else {
+                for(var i = 0; i<times;i++) {
+                  // var jdr = require('json-diff-rfc6902');
+                  var delta = jdr.diff($scope.users[0], $scope.users[1]);
+                }
+              // }
+              break;
+            case "5":
               //Usage: input in console:  browserify index.js -r changeset >changeset.js
               if($scope.size == "large") {
                 //this algorithem isn't work when the data is large
@@ -92,12 +104,12 @@ angular.module('userCtrl', [])
             "delta": delta,
             "rate": rate
           };
-          
+
           if(delta == undefined) {
             //if there is no modification
             console.log("patch=0");
           } else {
-            console.log("patch="+JSON.stringify(delta).length); 
+            console.log("patch="+JSON.stringify(delta).length);
           }
 
           console.log("old data="+JSON.stringify($scope.users[0]).length);
@@ -114,5 +126,3 @@ angular.module('userCtrl', [])
       });
    };
 });
-
-

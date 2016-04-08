@@ -1,7 +1,7 @@
 {
   "name": "jiff",
   "main": "jiff.js",
-  "version": "0.7.1",
+  "version": "0.7.3",
   "authors": [
     "Brian Cavalier <brian@hovercraftstudios.com>"
   ],
@@ -26,14 +26,13 @@
     "test",
     "experiments"
   ],
-  "_release": "0.7.1",
+  "_release": "0.7.3",
   "_resolution": {
     "type": "version",
-    "tag": "0.7.1",
-    "commit": "4381dc76940ca37cd691f265d919074b1754b3fe"
+    "tag": "0.7.3",
+    "commit": "3f8230f204baeaeaeca98ae6fa57f2156dd22613"
   },
   "_source": "git://github.com/cujojs/jiff.git",
-  "_target": "~0.7.1",
-  "_originalSource": "jiff",
-  "_direct": true
+  "_target": "0.7.3",
+  "_originalSource": "jiff"
 }
